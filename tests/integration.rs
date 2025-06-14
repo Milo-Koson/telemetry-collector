@@ -1,9 +1,13 @@
+use telemetry_collector::config::Config;
+
+use std::sync::Arc;
 use tower::ServiceExt;
 use http::Request;
 use tokio::time::{timeout, Duration};
 
 async fn get_metrics_response() -> http::Response<axum::body::Body> {
-    let app = telemetry_collector::server::create_app();
+    let config = Arc::new(Config::load());
+    let app = telemetry_collector::server::create_app(config);
 
     let request = Request::builder()
         .uri("/metrics")
@@ -34,7 +38,8 @@ async fn test_metrics_endpoint_response_json() {
 
 #[tokio::test]
 async fn testing_endpoint_methods() {
-    let app = telemetry_collector::server::create_app();
+    let config = Arc::new(Config::load());
+    let app = telemetry_collector::server::create_app(config);
 
     // Test GET method
     let get_request = Request::builder()
@@ -59,7 +64,8 @@ async fn testing_endpoint_methods() {
 
 #[tokio::test]
 async fn test_metrics_response_time() {
-    let app = telemetry_collector::server::create_app();
+    let config = Arc::new(Config::load());
+    let app = telemetry_collector::server::create_app(config.clone());
 
     let request = Request::builder()
         .uri("/metrics")
