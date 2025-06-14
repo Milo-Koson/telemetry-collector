@@ -16,5 +16,5 @@ pub async fn start_server() {
 }
 async fn telemetry_handler() -> Json<TelemetryReport> {
     let report = gather_all_metrics();
-    Json(report)
+    Json(report.unwrap())
 }
