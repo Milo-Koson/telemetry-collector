@@ -15,10 +15,10 @@ pub async fn start_server() {
     let app = create_app(config.clone());
 
     // Start the server on specified address & port
-    let addr = format!("127.0.0.1:{}", config.port);
+    let addr = format!("0.0.0.0:{}", config.port);
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 
-    println!("Server running on http://{}", addr);    
+    println!("Server running on http://{}{}", addr, config.metrics_path);    
 
     axum::serve(listener, app).await.unwrap();
 }
