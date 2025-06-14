@@ -1,17 +1,17 @@
 use sysinfo::{Disks, Networks, System};
 use crate::types::{TelemetryReport, DiskStat, NetworkStat};
 
-/// Collecte l'utilisation CPU en pourcentage
+/// Gathering CPU usage in percentage
 pub fn collect_cpu_usage(sys: &System) -> f32 {
     sys.global_cpu_usage()
 }
 
-/// Collecte les informations mémoire (total et utilisée)
+/// Gathering memory statistics
 pub fn collect_memory_usage(sys: &System) -> (u64, u64) {
     (sys.total_memory(), sys.used_memory())
 }
 
-/// Collecte les statistiques des disques
+/// Gathering disk statistics
 pub fn collect_disk_usage() -> Vec<DiskStat> {
     let disks = Disks::new_with_refreshed_list();
     let mut disk_stats = Vec::new();
@@ -25,7 +25,7 @@ pub fn collect_disk_usage() -> Vec<DiskStat> {
     }
     disk_stats
 }
-/// Agrège les statistiques réseau
+/// Gathering network statistics
 pub fn collect_network_usage() -> NetworkStat {
     let networks = Networks::new_with_refreshed_list();
     let mut total_received = 0;
@@ -40,8 +40,7 @@ pub fn collect_network_usage() -> NetworkStat {
         total_transmitted,  
     }
 }
-
-/// Regroupe toutes les métriques collectées dans un rapport unique
+/// Gathering all collected metrics into a single report
 pub fn gather_all_metrics() -> TelemetryReport {
     let mut sys = System::new_all();
     sys.refresh_all();

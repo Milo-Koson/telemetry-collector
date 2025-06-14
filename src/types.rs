@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-/// Rapport global contenant toutes les métriques système
+/// Global report containing all system metrics
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TelemetryReport {
     pub cpu_usage: f32,
@@ -10,7 +10,7 @@ pub struct TelemetryReport {
     pub network: NetworkStat,
 }
 
-/// Statistiques pour un disque individuel
+/// Stats for an individual disk
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiskStat {
     pub name: String,
@@ -18,7 +18,7 @@ pub struct DiskStat {
     pub available_space: u64,
 }
 
-/// Statistiques agrégées pour l'ensemble des interfaces réseau
+/// Stats for aggregated network interfaces
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NetworkStat {
     pub total_received: u64,

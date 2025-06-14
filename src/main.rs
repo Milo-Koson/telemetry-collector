@@ -1,7 +1,6 @@
-mod metrics;
-mod types;
-use crate::metrics::{gather_all_metrics};
-fn main() {
-    let report = gather_all_metrics();
-    println!("{:#?}", report);
+use telemetry_collector::server::start_server;
+
+#[tokio::main]
+async fn main() {
+    start_server().await;
 }
