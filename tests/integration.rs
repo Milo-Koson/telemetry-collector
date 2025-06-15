@@ -1,10 +1,10 @@
 use axum::body::Body;
 use telemetry_collector::config::Config;
 
-use std::sync::Arc;
-use tower::ServiceExt;
 use http::{Request, StatusCode};
-use tokio::time::{timeout, Duration};
+use std::sync::Arc;
+use tokio::time::{Duration, timeout};
+use tower::ServiceExt;
 
 async fn get_metrics_response() -> http::Response<axum::body::Body> {
     let config = mock_config();
@@ -42,11 +42,19 @@ async fn testing_endpoint_methods() {
     let config = mock_config();
     let app = telemetry_collector::server::create_app(config);
 
-    let get_response = app.clone().oneshot(build_request("GET", "/metrics")).await.unwrap();
+    let get_response = app
+        .clone()
+        .oneshot(build_request("GET", "/metrics"))
+        .await
+        .unwrap();
     assert_eq!(get_response.status(), StatusCode::OK);
 
     // Test POST method (should return 405 Method Not Allowed)
-    let post_response = app.clone().oneshot(build_request("POST", "/metrics")).await.unwrap();
+    let post_response = app
+        .clone()
+        .oneshot(build_request("POST", "/metrics"))
+        .await
+        .unwrap();
     assert_eq!(post_response.status(), StatusCode::METHOD_NOT_ALLOWED);
 }
 
@@ -60,7 +68,10 @@ async fn test_metrics_response_time() {
     // Setting a timeout of 2 seconds for the request
     let response_result = timeout(Duration::from_millis(2000), app.oneshot(request)).await;
 
-    assert!(response_result.is_ok(), "Timeout exceeded for /metrics request");
+    assert!(
+        response_result.is_ok(),
+        "Timeout exceeded for /metrics request"
+    );
 
     let response = response_result.unwrap().unwrap();
 

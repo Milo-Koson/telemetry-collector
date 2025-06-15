@@ -1,5 +1,5 @@
 use axum::response::IntoResponse;
-use axum::{routing::get, Router, Extension};
+use axum::{Extension, Router, routing::get};
 use prometheus::{Encoder, TextEncoder, gather};
 use std::sync::Arc;
 
@@ -8,7 +8,9 @@ use crate::metrics::update_metrics;
 
 pub fn create_app(config: Arc<Config>) -> Router {
     // Configure the router with a single endpoint (with only GET method)
-    Router::new().route(&config.metrics_path, get(telemetry_handler)).layer(Extension(config))
+    Router::new()
+        .route(&config.metrics_path, get(telemetry_handler))
+        .layer(Extension(config))
 }
 
 pub async fn start_server() {
@@ -19,12 +21,11 @@ pub async fn start_server() {
     let addr = format!("0.0.0.0:{}", config.port);
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 
-    println!("Server running on http://{}{}", addr, config.metrics_path);    
+    println!("Server running on http://{}{}", addr, config.metrics_path);
 
     axum::serve(listener, app).await.unwrap();
 }
 async fn telemetry_handler(Extension(_config): Extension<Arc<Config>>) -> impl IntoResponse {
-
     update_metrics();
     let metric_families = gather();
 
@@ -37,7 +38,10 @@ async fn telemetry_handler(Extension(_config): Extension<Arc<Config>>) -> impl I
 
     // Send the response with the correct Content-Type
     (
-        [(axum::http::header::CONTENT_TYPE, encoder.format_type().to_string())],
+        [(
+            axum::http::header::CONTENT_TYPE,
+            encoder.format_type().to_string(),
+        )],
         body,
     )
 }

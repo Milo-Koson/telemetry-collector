@@ -13,17 +13,14 @@ const DEFAULT_METRICS_PATH: &str = "/metrics";
 impl Config {
     /// Loads the configuration from environment variables.
     pub fn load() -> Self {
-
         let port = env::var("TELEMETRY_PORT")
             .ok()
             .and_then(|v| v.parse().ok())
             .unwrap_or(DEFAULT_PORT);
 
-        let metrics_path = env::var("TELEMETRY_METRICS_PATH").unwrap_or_else(|_| DEFAULT_METRICS_PATH.to_string());
+        let metrics_path =
+            env::var("TELEMETRY_METRICS_PATH").unwrap_or_else(|_| DEFAULT_METRICS_PATH.to_string());
 
-        Config {
-            port,
-            metrics_path,
-        }
+        Config { port, metrics_path }
     }
 }
