@@ -1,9 +1,10 @@
-use axum::{routing::get, Router, Json, Extension};
+use axum::response::IntoResponse;
+use axum::{routing::get, Router, Extension};
+use prometheus::{Encoder, TextEncoder, gather};
 use std::sync::Arc;
 
-use crate::types::TelemetryReport;
-use crate::metrics::gather_all_metrics;
 use crate::config::Config;
+use crate::metrics::update_metrics;
 
 pub fn create_app(config: Arc<Config>) -> Router {
     // Configure the router with a single endpoint (with only GET method)
@@ -22,7 +23,21 @@ pub async fn start_server() {
 
     axum::serve(listener, app).await.unwrap();
 }
-async fn telemetry_handler(Extension(_config): Extension<Arc<Config>>) -> Json<TelemetryReport> {
-    let report = gather_all_metrics();
-    Json(report.unwrap())
+async fn telemetry_handler(Extension(_config): Extension<Arc<Config>>) -> impl IntoResponse {
+
+    update_metrics();
+    let metric_families = gather();
+
+    // Encoder to convert metrics to text format
+    let encoder = TextEncoder::new();
+    let mut buffer = Vec::new();
+    encoder.encode(&metric_families, &mut buffer).unwrap();
+
+    let body = String::from_utf8(buffer).unwrap();
+
+    // Send the response with the correct Content-Type
+    (
+        [(axum::http::header::CONTENT_TYPE, encoder.format_type().to_string())],
+        body,
+    )
 }

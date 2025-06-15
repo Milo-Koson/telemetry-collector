@@ -1,43 +1,27 @@
-use sysinfo::{Disks, Networks, System};
-use crate::types::{TelemetryReport, DiskStat, NetworkStat};
-use std::io::{Error, ErrorKind};
+use prometheus::{Gauge, IntGauge, register_gauge, register_int_gauge};
+use sysinfo::{Networks, System};
+use once_cell::sync::Lazy;
 
-/// Gathering CPU usage in percentage
-pub fn collect_cpu_usage(sys: &System) -> Result<f32, Error> {
-    Ok(sys.global_cpu_usage())
-}
+// Déclaration des métriques Prometheus globales, thread-safe avec Lazy
 
-/// Gathering memory statistics
-pub fn collect_memory_usage(sys: &System) -> Result<(u64, u64), Error> {
-    Ok((sys.total_memory(), sys.used_memory()))
-}
+pub static CPU_USAGE: Lazy<Gauge> = Lazy::new(|| register_gauge!("cpu_usage_percent", "CPU usage in percent").unwrap());
+pub static MEMORY_TOTAL: Lazy<IntGauge> = Lazy::new(|| register_int_gauge!("memory_total_bytes", "Total memory in bytes").unwrap());
+pub static MEMORY_USED: Lazy<IntGauge> = Lazy::new(|| register_int_gauge!("memory_used_bytes", "Used memory in bytes").unwrap());
 
-/// Gathering disk statistics
-pub fn collect_disk_usage() -> Result<Vec<DiskStat>, Error> {
-    let disks = Disks::new_with_refreshed_list();
-    if disks.list().is_empty() {
-        return Err(Error::new(ErrorKind::NotFound, "No disks found"));
-    }
-    
-    let mut disk_stats = Vec::new();
-    for disk in disks.list() {
-        let disk_stat = DiskStat {
-            name: disk.name().to_string_lossy().to_string(),
-            total_space: disk.total_space(),
-            available_space: disk.available_space(),
-        };
-        disk_stats.push(disk_stat);
-    }
-    Ok(disk_stats)
-}
+pub static NETWORK_RECEIVED: Lazy<IntGauge> = Lazy::new(|| register_int_gauge!("network_received_bytes_total", "Total network received bytes").unwrap());
+pub static NETWORK_TRANSMITTED: Lazy<IntGauge> = Lazy::new(|| register_int_gauge!("network_transmitted_bytes_total", "Total network transmitted bytes").unwrap());
 
-/// Gathering network statistics
-pub fn collect_network_usage() -> Result<NetworkStat, Error> {
+/// Met à jour les métriques avec les dernières données système
+pub fn update_metrics() {
+    let mut sys = System::new_all();
+    sys.refresh_all();
+
+    CPU_USAGE.set(sys.global_cpu_usage() as f64);
+
+    MEMORY_TOTAL.set(sys.total_memory() as i64 * 1024); // conversion en bytes
+    MEMORY_USED.set(sys.used_memory() as i64 * 1024);
+
     let networks = Networks::new_with_refreshed_list();
-    if networks.list().is_empty() {
-        return Err(Error::new(ErrorKind::NotFound, "No network interfaces found"));
-    }
-
     let mut total_received = 0;
     let mut total_transmitted = 0;
 
@@ -45,27 +29,7 @@ pub fn collect_network_usage() -> Result<NetworkStat, Error> {
         total_received += data.received();
         total_transmitted += data.transmitted();
     }
-    Ok(NetworkStat {
-        total_received,
-        total_transmitted,  
-    })
-}
 
-/// Gathering all collected metrics into a single report
-pub fn gather_all_metrics() -> Result<TelemetryReport, Error> {
-    let mut sys = System::new_all();
-    sys.refresh_all();
-
-    let cpu_usage = collect_cpu_usage(&sys)?;
-    let (memory_total, memory_used) = collect_memory_usage(&sys)?;
-    let disks = collect_disk_usage()?;
-    let network = collect_network_usage()?;
-
-    Ok(TelemetryReport {
-        cpu_usage,
-        memory_total,
-        memory_used,
-        disks,
-        network,
-    })
+    NETWORK_RECEIVED.set(total_received as i64);
+    NETWORK_TRANSMITTED.set(total_transmitted as i64);
 }

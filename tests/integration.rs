@@ -37,18 +37,6 @@ async fn test_metrics_endpoint_status_ok() {
     assert_eq!(response.status(), StatusCode::OK);
 }
 
-/// Verify that the response is in a valid JSON format
-#[tokio::test]
-async fn test_metrics_endpoint_response_json() {
-    let response = get_metrics_response().await;
-    assert_eq!(response.status(), StatusCode::OK);
-
-    assert_eq!(response.headers().get("content-type").unwrap(), "application/json");
-
-    let body = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
-    serde_json::from_slice::<telemetry_collector::types::TelemetryReport>(&body).unwrap();
-}
-
 #[tokio::test]
 async fn testing_endpoint_methods() {
     let config = mock_config();
