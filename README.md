@@ -86,8 +86,12 @@ Ces paramètres sont gérés dynamiquement dans le code.
 
 Dans le répertoire ```docker/supervision/grafana``` j'ai pu provisionner grafana avec 2 dashboards stockés dans un volume docker afin qu'ils soient inclus par défaut lorsque l'utilisateur se connecte.
 
-- Le 1er dashboard affiche l'usage du CPU en fonction du temps (Données rafraîchies toutes les 5 secondes).
-- Le 2e dashboard affiche le taux d'espace libre et le taux d'espace occupé sur le disque de stockage.
+- Le 1er dashboard affiche l'usage du CPU en fonction du temps.
+- Le 2e dashboard affiche le taux de RAM utilisée et le taux de RAM libre.
+
+Les données sont rafraîchies toutes les 5 secondes.
+
+J’ai également provisionné Grafana pour qu’il se connecte automatiquement à sa source de données (Prometheus).
 
 ### 🔄 Intégration Continue (CI)
 
