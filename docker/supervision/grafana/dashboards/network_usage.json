@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -29,18 +29,45 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "super-light-blue",
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 0.03,
+            "fillOpacity": 100,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
+            },
+            "lineWidth": 0,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
             }
           },
+          "fieldMinMax": false,
           "mappings": [],
-          "unit": "decgbytes"
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decmbytes"
         },
         "overrides": []
       },
@@ -52,28 +79,27 @@
       },
       "id": 1,
       "options": {
-        "displayLabels": [
-          "value",
-          "percent"
-        ],
+        "barRadius": 0,
+        "barWidth": 0.98,
+        "fullHighlight": false,
+        "groupWidth": 1,
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
           "sort": "none"
-        }
+        },
+        "xField": "Time",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
       },
       "pluginVersion": "12.0.1+security-01",
       "targets": [
@@ -84,13 +110,11 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "memory_total_gigabytes - memory_used_gigabytes",
-          "format": "time_series",
-          "hide": false,
+          "expr": "rate(network_received_megabytes_total[1m])",
           "instant": true,
-          "legendFormat": "Remaining RAM",
+          "legendFormat": "Download",
           "range": false,
-          "refId": "B"
+          "refId": "A"
         },
         {
           "datasource": {
@@ -99,17 +123,16 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "memory_used_gigabytes",
-          "format": "time_series",
+          "expr": "rate(network_transmitted_megabytes_total[1m])",
+          "hide": false,
           "instant": true,
-          "interval": "",
-          "legendFormat": "RAM Used",
+          "legendFormat": "Upload",
           "range": false,
-          "refId": "A"
+          "refId": "B"
         }
       ],
-      "title": "RAM Usage",
-      "type": "piechart"
+      "title": "Network Usage",
+      "type": "barchart"
     }
   ],
   "preload": false,
@@ -125,7 +148,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "RAM",
-  "uid": "deed2dac-80bc-44e8-99ab-3387b933e73f",
+  "title": "Network Usage",
+  "uid": "f6026096-005f-428a-b64e-f9b360715e97",
   "version": 1
 }
