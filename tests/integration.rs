@@ -10,9 +10,11 @@ async fn get_metrics_response() -> http::Response<axum::body::Body> {
     let config = mock_config();
     let app = telemetry_collector::server::create_app(config);
 
-    let request = build_request("GET", "/metrics");
+    let system_metrics_request = build_request("GET", "/metrics/system");
+    let status_metrics_request = build_request("GET", "/metrics/status");
 
-    app.oneshot(request).await.unwrap()
+    app.clone().oneshot(system_metrics_request).await.unwrap();
+    app.oneshot(status_metrics_request).await.unwrap()
 }
 
 fn build_request(method: &str, uri: &str) -> Request<Body> {
@@ -26,7 +28,8 @@ fn build_request(method: &str, uri: &str) -> Request<Body> {
 fn mock_config() -> Arc<Config> {
     Arc::new(Config {
         port: 8080,
-        metrics_path: "/metrics".to_string(),
+        system_metrics_path: "/metrics/system".to_string(),
+        status_metrics_path: "/metrics/status".to_string(),
     })
 }
 
@@ -40,11 +43,11 @@ async fn test_metrics_endpoint_status_ok() {
 #[tokio::test]
 async fn testing_endpoint_methods() {
     let config = mock_config();
-    let app = telemetry_collector::server::create_app(config);
+    let app = telemetry_collector::server::create_app(config.clone());
 
     let get_response = app
         .clone()
-        .oneshot(build_request("GET", "/metrics"))
+        .oneshot(build_request("GET", &config.system_metrics_path))
         .await
         .unwrap();
     assert_eq!(get_response.status(), StatusCode::OK);
@@ -52,7 +55,22 @@ async fn testing_endpoint_methods() {
     // Test POST method (should return 405 Method Not Allowed)
     let post_response = app
         .clone()
-        .oneshot(build_request("POST", "/metrics"))
+        .oneshot(build_request("POST", &config.system_metrics_path))
+        .await
+        .unwrap();
+    assert_eq!(post_response.status(), StatusCode::METHOD_NOT_ALLOWED);
+
+    let get_response = app
+        .clone()
+        .oneshot(build_request("GET", &config.status_metrics_path))
+        .await
+        .unwrap();
+    assert_eq!(get_response.status(), StatusCode::OK);
+
+    // Test POST method (should return 405 Method Not Allowed)
+    let post_response = app
+        .clone()
+        .oneshot(build_request("POST", &config.status_metrics_path))
         .await
         .unwrap();
     assert_eq!(post_response.status(), StatusCode::METHOD_NOT_ALLOWED);
@@ -63,17 +81,34 @@ async fn test_metrics_response_time() {
     let config = mock_config();
     let app = telemetry_collector::server::create_app(config.clone());
 
-    let request = build_request("GET", "/metrics");
+    let system_metrics_request = build_request("GET", "/metrics/system");
+    let status_metrics_request = build_request("GET", "/metrics/status");
 
     // Setting a timeout of 2 seconds for the request
-    let response_result = timeout(Duration::from_millis(2000), app.oneshot(request)).await;
-
+    let system_response_result = timeout(
+        Duration::from_millis(2000),
+        app.clone().oneshot(system_metrics_request),
+    )
+    .await
+    .unwrap();
+    let status_response_result = timeout(
+        Duration::from_millis(2000),
+        app.oneshot(status_metrics_request),
+    )
+    .await
+    .unwrap();
     assert!(
-        response_result.is_ok(),
-        "Timeout exceeded for /metrics request"
+        system_response_result.is_ok(),
+        "Timeout exceeded for /metrics/system request"
+    );
+    assert!(
+        status_response_result.is_ok(),
+        "Timeout exceeded for /metrics/status request"
     );
 
-    let response = response_result.unwrap().unwrap();
+    let system_response = system_response_result.unwrap();
+    let status_response = status_response_result.unwrap();
 
-    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(system_response.status(), StatusCode::OK);
+    assert_eq!(status_response.status(), StatusCode::OK);
 }

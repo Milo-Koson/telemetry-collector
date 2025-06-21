@@ -1,37 +1,62 @@
 use once_cell::sync::Lazy;
-use prometheus::{Gauge, register_gauge};
-use sysinfo::System;
+use prometheus::{Gauge, Registry, register_gauge_with_registry};
 use std::process::Command;
+use sysinfo::System;
+
+// New registry for system metrics
+pub static SYSTEM_REGISTRY: Lazy<Registry> = Lazy::new(Registry::new);
 
 const KBYTES_IN_GB: f64 = 1024.0 * 1024.0 * 1024.0;
 const BYTES_IN_MB: f64 = 1024.0 * 1024.0;
 
 // Metrics declaration
-pub static CPU_USAGE: Lazy<Gauge> =
-    Lazy::new(|| register_gauge!("cpu_usage_percent", "CPU usage in percent").unwrap());
-pub static MEMORY_TOTAL: Lazy<Gauge> =
-    Lazy::new(|| register_gauge!("memory_total_gigabytes", "Total memory in gigabytes").unwrap());
-pub static MEMORY_USED: Lazy<Gauge> =
-    Lazy::new(|| register_gauge!("memory_used_gigabytes", "Used memory in gigabytes").unwrap());
-
-
-pub static NETWORK_RECEIVED: Lazy<Gauge> = Lazy::new(|| {
-    register_gauge!(
-        "network_received_megabytes_total",
-        "Total network received in megabytes"
+pub static CPU_USAGE: Lazy<Gauge> = Lazy::new(|| {
+    register_gauge_with_registry!(
+        "cpu_usage_percent",
+        "CPU usage in percent",
+        &*SYSTEM_REGISTRY
     )
     .unwrap()
 });
+
+pub static MEMORY_TOTAL: Lazy<Gauge> = Lazy::new(|| {
+    register_gauge_with_registry!(
+        "memory_total_gigabytes",
+        "Total memory in gigabytes",
+        &*SYSTEM_REGISTRY
+    )
+    .unwrap()
+});
+
+pub static MEMORY_USED: Lazy<Gauge> = Lazy::new(|| {
+    register_gauge_with_registry!(
+        "memory_used_gigabytes",
+        "Used memory in gigabytes",
+        &*SYSTEM_REGISTRY
+    )
+    .unwrap()
+});
+
+pub static NETWORK_RECEIVED: Lazy<Gauge> = Lazy::new(|| {
+    register_gauge_with_registry!(
+        "network_received_megabytes_total",
+        "Total network received in megabytes",
+        &*SYSTEM_REGISTRY
+    )
+    .unwrap()
+});
+
 pub static NETWORK_TRANSMITTED: Lazy<Gauge> = Lazy::new(|| {
-    register_gauge!(
+    register_gauge_with_registry!(
         "network_transmitted_megabytes_total",
-        "Total network transmitted in megabytes"
+        "Total network transmitted in megabytes",
+        &*SYSTEM_REGISTRY
     )
     .unwrap()
 });
 
 /// Update the metrics with the latest system information
-pub fn update_metrics() {
+pub fn update_system_metrics() {
     let mut sys = System::new_all();
     sys.refresh_all();
 

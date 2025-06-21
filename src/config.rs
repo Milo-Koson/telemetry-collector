@@ -4,11 +4,13 @@ use std::env;
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub port: u16,
-    pub metrics_path: String,
+    pub system_metrics_path: String,
+    pub status_metrics_path: String,
 }
 
 const DEFAULT_PORT: u16 = 8080;
-const DEFAULT_METRICS_PATH: &str = "/metrics";
+const DEFAULT_SYSTEM_METRICS_PATH: &str = "/metrics/system";
+const DEFAULT_STATUS_METRICS_PATH: &str = "/metrics/status";
 
 impl Config {
     /// Loads the configuration from environment variables.
@@ -18,9 +20,15 @@ impl Config {
             .and_then(|v| v.parse().ok())
             .unwrap_or(DEFAULT_PORT);
 
-        let metrics_path =
-            env::var("TELEMETRY_METRICS_PATH").unwrap_or_else(|_| DEFAULT_METRICS_PATH.to_string());
+        let system_metrics_path = env::var("SYSTEM_METRICS_PATH")
+            .unwrap_or_else(|_| DEFAULT_SYSTEM_METRICS_PATH.to_string());
+        let status_metrics_path = env::var("STATUS_METRICS_PATH")
+            .unwrap_or_else(|_| DEFAULT_STATUS_METRICS_PATH.to_string());
 
-        Config { port, metrics_path }
+        Config {
+            port,
+            system_metrics_path,
+            status_metrics_path,
+        }
     }
 }
