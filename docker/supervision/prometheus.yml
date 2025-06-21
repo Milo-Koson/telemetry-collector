@@ -7,6 +7,6 @@ scrape_configs:
     static_configs:
       - targets: ['host.docker.internal:8080']
   - job_name: 'status_metrics'
-    metrics_path: "/metrics/statut"
+    metrics_path: "/metrics/status"
     static_configs:
       - targets: ['host.docker.internal:8080']
