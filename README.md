@@ -40,11 +40,24 @@ Il y a 2 manières de démarrer le projet :
 
 À la racine du projet, il y a un **Makefile** qui peut effectuer 5 commandes sur le fichier ```docker/docker-compose.yml```:
 
-- Make up : Permet de lancer la commande ```docker compose -f up -d``` (sans le build des modifications)
-- Make up-build : Permet de lancer la commande ```docker compose -f up -d --build``` (avec le build des modifications)
-- Make down : Permet de lancer la commande ```docker compose -f down```
-- Make logs : Permet de lancer la commande ```docker compose -f logs -f```
-- Make clean : Permet de lancer la commande ```docker compose down``` + Suppression des volumes + Suppression des networks
+- **make up**  
+  Génère la configuration Prometheus puis démarre les containers Docker en arrière-plan (avec `docker compose -f docker/docker-compose.yml up -d`)  
+  et lance ensuite le binaire `telemetry-collector` via `cargo run --release`.
+
+- **make down**  
+  Arrête et supprime les containers Docker (commande : `docker compose -f docker/docker-compose.yml down`).
+
+- **make logs**  
+  Affiche les logs en temps réel des containers Docker (commande : `docker compose -f docker/docker-compose.yml logs -f`).
+
+- **make clean**  
+  Exécute `make down` puis supprime les volumes Docker associés au projet pour un nettoyage complet.
+
+- **make generate_prometheus**  
+  Vérifie les variables d'environnement définies dans le fichier ```.env``` situé à la racine du projet et adapte le fichier prometheus.yml.
+
+- **make run**  
+  Compile et lance localement le binaire `telemetry-collector` en mode release.
 
 ### ▶️ Démarrage avec Docker
 
@@ -84,10 +97,11 @@ Ces paramètres sont gérés dynamiquement dans le code.
 
 ### 📊 Grafana
 
-Dans le répertoire ```docker/supervision/grafana``` j'ai pu provisionner grafana avec 2 dashboards stockés dans un volume docker afin qu'ils soient inclus par défaut lorsque l'utilisateur se connecte.
+Dans le répertoire ```docker/supervision/grafana``` j'ai pu provisionner grafana avec 3 dashboards stockés dans un volume docker afin qu'ils soient inclus par défaut lorsque l'utilisateur se connecte.
 
 - Le 1er dashboard affiche l'usage du CPU en fonction du temps.
-- Le 2e dashboard affiche le taux de RAM utilisée et le taux de RAM libre.
+- Le 2e dashboard affiche le volume de RAM utilisée et le volume de RAM libre.
+- Le 3e dashboard affiche le volule de débit montant (upload) et le débit descendant (download) sur la dernière minute.
 
 Les données sont rafraîchies toutes les 5 secondes.
 
