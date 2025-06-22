@@ -1,0 +1,20 @@
+{
+    "apiVersion": 1,
+    "contactPoints": [
+        {
+            "orgId": 1,
+            "name": "Outlook_User",
+            "receivers": [
+                {
+                    "uid": "bepmfgxdcpjpcd",
+                    "type": "email",
+                    "settings": {
+                        "addresses": "milo.koson@outlook.fr",
+                        "singleEmail": false
+                    },
+                    "disableResolveMessage": false
+                }
+            ]
+        }
+    ]
+}

@@ -25,6 +25,8 @@ services:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
+    env_file:
+      - ../.env.secret
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
@@ -32,6 +34,7 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ./supervision/grafana/dashboards:/etc/grafana/dashboards
+      - ./supervision/grafana/alerting:/etc/grafana/provisioning/alerting
       - ./supervision/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
       - ./supervision/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
 

@@ -46,7 +46,7 @@ pub fn update_status_metrics() {
     .output()
     {
         let stdout = String::from_utf8_lossy(&output.stdout);
-        let wifi_active = stdout.contains("AirPort") || stdout.contains("agrCtlRSSI");
+        let wifi_active = stdout.contains("state: running");
         WIFI_ENABLED.set(wifi_active as i32 as f64);
     }
 
@@ -56,7 +56,7 @@ pub fn update_status_metrics() {
         .output()
     {
         let stdout = String::from_utf8_lossy(&output.stdout);
-        let bt_active = stdout.contains("Bluetooth Power: On");
+        let bt_active = stdout.contains("State: On");
         BLUETOOTH_ENABLED.set(bt_active as i32 as f64);
     }
 
