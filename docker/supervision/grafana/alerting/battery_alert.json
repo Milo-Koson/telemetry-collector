@@ -5,7 +5,7 @@
             "orgId": 1,
             "name": "Battery Alert",
             "folder": "Status",
-            "interval": "1m",
+            "interval": "30s",
             "rules": [
                 {
                     "uid": "cepmd91v2u4g0e",
@@ -73,9 +73,16 @@
                             }
                         }
                     ],
-                    "noDataState": "NoData",
+                    "dashboardUid": "1ed95593-cc0a-48cc-80c6-72415c2a663a",
+                    "panelId": 1,
+                    "noDataState": "OK",
                     "execErrState": "Error",
-                    "for": "1m",
+                    "for": "30s",
+                    "annotations": {
+                        "__dashboardUid__": "1ed95593-cc0a-48cc-80c6-72415c2a663a",
+                        "__panelId__": "1",
+                        "description": "The current battery level is below 15%, please consider charging the computer !"
+                    },
                     "isPaused": false,
                     "notification_settings": {
                         "receiver": "Outlook_User"

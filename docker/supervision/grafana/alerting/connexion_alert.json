@@ -74,8 +74,8 @@
                         }
                     ],
                     "noDataState": "NoData",
-                    "execErrState": "Error",
-                    "for": "5s",
+                    "execErrState": "OK",
+                    "for": "10s",
                     "isPaused": false,
                     "notification_settings": {
                         "receiver": "Outlook_User"
